@@ -31,6 +31,12 @@
     <hr>
 
     <p>
+        <a href="${pageContext.request.contextPath}/profile">
+            Thông tin cá nhân
+        </a>
+    </p>
+
+    <p>
         <a href="${pageContext.request.contextPath}/admin/category/list">
             Xem và quản lý Category
         </a>
