@@ -60,6 +60,11 @@
 			<artifactId>expressly</artifactId>
 			<version>5.0.0</version>
 		</dependency>
+		<dependency>
+    <groupId>org.sitemesh</groupId>
+    <artifactId>sitemesh</artifactId>
+    <version>3.2.1</version>
+</dependency>
 	</dependencies>
 	<build>
 		<finalName>bt02_24162111</finalName>
