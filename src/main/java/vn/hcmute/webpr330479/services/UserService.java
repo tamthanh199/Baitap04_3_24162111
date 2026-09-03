@@ -8,6 +8,10 @@ public interface UserService {
 
     User login(String username, String password);
 
+    User getById(int id);
+
+    void update(User user);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);

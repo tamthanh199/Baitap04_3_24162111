@@ -1,11 +1,9 @@
 package vn.hcmute.webpr330479.dao.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import vn.hcmute.webpr330479.connection.DBConnection;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
+import vn.hcmute.webpr330479.config.JPAConfig;
 import vn.hcmute.webpr330479.dao.UserDao;
 import vn.hcmute.webpr330479.models.User;
 
@@ -13,82 +11,152 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void insert(User user) {
-        String sql = """
-                INSERT INTO AppUser (username, user_password, full_name, email, phone)
-                VALUES (?, ?, ?, ?, ?)
-                """;
 
-        try (Connection connection = new DBConnection().getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
 
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getPassword());
-            statement.setString(3, user.getFullName());
-            statement.setString(4, user.getEmail());
-            statement.setString(5, user.getPhone());
-            statement.executeUpdate();
-        } catch (SQLException exception) {
-            throw new RuntimeException("Khong the them tai khoan.", exception);
+        try {
+            transaction.begin();
+
+            entityManager.persist(user);
+
+            transaction.commit();
+
+        } catch (Exception exception) {
+
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+
+            throw exception;
+
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    @Override
+    public void update(User user) {
+
+        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
+        try {
+            transaction.begin();
+
+            entityManager.merge(user);
+
+            transaction.commit();
+
+        } catch (Exception exception) {
+
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+
+            throw exception;
+
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    @Override
+    public User getById(int id) {
+
+        EntityManager entityManager = JPAConfig.getEntityManager();
+
+        try {
+            return entityManager.find(User.class, id);
+
+        } finally {
+            entityManager.close();
         }
     }
 
     @Override
     public User getByUsername(String username) {
-        String sql = """
-                SELECT user_id, username, user_password, full_name, email, phone
-                FROM AppUser
-                WHERE username = ?
-                """;
 
-        try (Connection connection = new DBConnection().getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        EntityManager entityManager = JPAConfig.getEntityManager();
 
-            statement.setString(1, username);
+        try {
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new User(
-                            resultSet.getInt("user_id"),
-                            resultSet.getString("username"),
-                            resultSet.getString("user_password"),
-                            resultSet.getString("full_name"),
-                            resultSet.getString("email"),
-                            resultSet.getString("phone"));
-                }
-            }
-        } catch (SQLException exception) {
-            throw new RuntimeException("Khong the tim tai khoan.", exception);
+            return entityManager
+                    .createQuery(
+                            "SELECT u FROM User u WHERE u.username = :username",
+                            User.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+        } catch (NoResultException exception) {
+
+            return null;
+
+        } finally {
+            entityManager.close();
         }
-
-        return null;
     }
 
     @Override
     public boolean existsByUsername(String username) {
-        return exists("SELECT 1 FROM AppUser WHERE username = ?", username);
+
+        EntityManager entityManager = JPAConfig.getEntityManager();
+
+        try {
+
+            Long count = entityManager
+                    .createQuery(
+                            "SELECT COUNT(u) FROM User u WHERE u.username = :username",
+                            Long.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+            return count > 0;
+
+        } finally {
+            entityManager.close();
+        }
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return exists("SELECT 1 FROM AppUser WHERE email = ?", email);
+
+        EntityManager entityManager = JPAConfig.getEntityManager();
+
+        try {
+
+            Long count = entityManager
+                    .createQuery(
+                            "SELECT COUNT(u) FROM User u WHERE u.email = :email",
+                            Long.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+
+            return count > 0;
+
+        } finally {
+            entityManager.close();
+        }
     }
 
     @Override
     public boolean existsByPhone(String phone) {
-        return exists("SELECT 1 FROM AppUser WHERE phone = ?", phone);
-    }
 
-    private boolean exists(String sql, String value) {
-        try (Connection connection = new DBConnection().getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        EntityManager entityManager = JPAConfig.getEntityManager();
 
-            statement.setString(1, value);
+        try {
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next();
-            }
-        } catch (SQLException exception) {
-            throw new RuntimeException("Khong the kiem tra tai khoan.", exception);
+            Long count = entityManager
+                    .createQuery(
+                            "SELECT COUNT(u) FROM User u WHERE u.phone = :phone",
+                            Long.class)
+                    .setParameter("phone", phone)
+                    .getSingleResult();
+
+            return count > 0;
+
+        } finally {
+            entityManager.close();
         }
     }
 }

@@ -11,18 +11,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean register(User user) {
+
         if (existsByUsername(user.getUsername())
                 || existsByEmail(user.getEmail())
                 || existsByPhone(user.getPhone())) {
+
             return false;
         }
 
         userDao.insert(user);
+
         return true;
     }
 
     @Override
     public User login(String username, String password) {
+
         User user = userDao.getByUsername(username);
 
         if (user != null && password.equals(user.getPassword())) {
@@ -31,7 +35,17 @@ public class UserServiceImpl implements UserService {
 
         return null;
     }
-    
+
+    @Override
+    public User getById(int id) {
+        return userDao.getById(id);
+    }
+
+    @Override
+    public void update(User user) {
+        userDao.update(user);
+    }
+
     @Override
     public boolean existsByUsername(String username) {
         return userDao.existsByUsername(username);
