@@ -3,16 +3,22 @@ package vn.hcmute.webpr330479.controllers;
 import java.io.IOException;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import vn.hcmute.webpr330479.models.User;
 import vn.hcmute.webpr330479.services.UserService;
 import vn.hcmute.webpr330479.services.impl.UserServiceImpl;
+import vn.hcmute.webpr330479.utils.FileUploadUtil;
 
 @WebServlet(urlPatterns = {"/profile"})
+@MultipartConfig(
+        maxFileSize = 5 * 1024 * 1024,
+        maxRequestSize = 6 * 1024 * 1024)
 public class ProfileController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -26,21 +32,25 @@ public class ProfileController extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        if (session == null || session.getAttribute("account") == null) {
+        if (session == null
+                || session.getAttribute("account") == null) {
+
             response.sendRedirect(
-                    request.getContextPath() + "/session/login"
-            );
+                    request.getContextPath() + "/session/login");
+
             return;
         }
 
-        User sessionUser = (User) session.getAttribute("account");
+        User sessionUser =
+                (User) session.getAttribute("account");
 
-        User user = userService.getById(sessionUser.getId());
+        User user =
+                userService.getById(sessionUser.getId());
 
         request.setAttribute("user", user);
 
         request.getRequestDispatcher("/views/profile.jsp")
-               .forward(request, response);
+                .forward(request, response);
     }
 
     @Override
@@ -52,30 +62,71 @@ public class ProfileController extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        if (session == null || session.getAttribute("account") == null) {
+        if (session == null
+                || session.getAttribute("account") == null) {
+
             response.sendRedirect(
-                    request.getContextPath() + "/session/login"
-            );
+                    request.getContextPath() + "/session/login");
+
             return;
         }
 
-        User sessionUser = (User) session.getAttribute("account");
+        User sessionUser =
+                (User) session.getAttribute("account");
 
-        User user = userService.getById(sessionUser.getId());
+        User user =
+                userService.getById(sessionUser.getId());
 
-        String fullName = request.getParameter("fullName");
-        String phone = request.getParameter("phone");
+        String fullName =
+                request.getParameter("fullName");
 
-        user.setFullName(fullName);
-        user.setPhone(phone);
+        String phone =
+                request.getParameter("phone");
 
-        userService.update(user);
+        String oldImage =
+                user.getImages();
 
-        session.setAttribute("account", user);
+        try {
 
-        response.sendRedirect(
-                request.getContextPath()
-                + "/profile?success=true"
-        );
+            Part imagePart =
+                    request.getPart("image");
+
+            String newImage =
+                    FileUploadUtil.saveProfileImage(imagePart);
+
+            user.setFullName(fullName);
+            user.setPhone(phone);
+
+            if (newImage != null) {
+
+                user.setImages(newImage);
+
+                if (oldImage != null
+                        && !oldImage.isBlank()) {
+
+                    FileUploadUtil
+                            .deleteProfileImage(oldImage);
+                }
+            }
+
+            userService.update(user);
+
+            session.setAttribute("account", user);
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/profile?success=true");
+
+        } catch (IOException exception) {
+
+            request.setAttribute(
+                    "message",
+                    exception.getMessage());
+
+            request.setAttribute("user", user);
+
+            request.getRequestDispatcher("/views/profile.jsp")
+                    .forward(request, response);
+        }
     }
 }
