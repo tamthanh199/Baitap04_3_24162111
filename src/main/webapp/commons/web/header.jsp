@@ -1,89 +1,155 @@
 <%@ page contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ taglib prefix="c"
+<%@ taglib
+    prefix="c"
     uri="jakarta.tags.core" %>
 
-<header style="
-    background-color: #eeeeee;
-    padding: 15px;
-    margin-bottom: 20px;
-">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
 
-    <h2>
-        WEBPR330479 - Servlet CRUD MVC
-    </h2>
+    <div class="container">
 
-    <nav>
+        <a
+            class="navbar-brand fw-semibold"
+            href="${pageContext.request.contextPath}/home">
 
-        <a href="${pageContext.request.contextPath}/home">
-            Trang chủ
+            WEBPR330479
+
         </a>
 
-        &nbsp; | &nbsp;
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
 
-        <a href="${pageContext.request.contextPath}/product">
-            Sản phẩm
-        </a>
+            <span class="navbar-toggler-icon"></span>
 
-        &nbsp; | &nbsp;
+        </button>
 
-        <c:choose>
+        <div
+            class="collapse navbar-collapse"
+            id="mainNavbar">
 
-            <c:when test="${not empty sessionScope.account}">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                <span>
+                <li class="nav-item">
 
-                    Xin chào,
+                    <a
+                        class="nav-link"
+                        href="${pageContext.request.contextPath}/home">
 
-                    <strong>
-                        ${sessionScope.account.fullName}
-                    </strong>
+                        Trang chủ
 
-                </span>
+                    </a>
 
-                &nbsp; | &nbsp;
+                </li>
 
-                <a href="${pageContext.request.contextPath}/profile">
-                    Profile
-                </a>
+                <li class="nav-item">
 
-                &nbsp; | &nbsp;
+                    <a
+                        class="nav-link"
+                        href="${pageContext.request.contextPath}/product">
 
-                <a href="${pageContext.request.contextPath}/admin/category/list">
-                    Category
-                </a>
+                        Sản phẩm
 
-                &nbsp; | &nbsp;
+                    </a>
 
-                <a href="${pageContext.request.contextPath}/admin/product/list">
-                    Product CRUD
-                </a>
+                </li>
 
-                &nbsp; | &nbsp;
+                <c:if test="${not empty sessionScope.account}">
 
-                <a href="${pageContext.request.contextPath}/logout">
-                    Đăng xuất
-                </a>
+                    <li class="nav-item">
 
-            </c:when>
+                        <a
+                            class="nav-link"
+                            href="${pageContext.request.contextPath}/admin/category/list">
 
-            <c:otherwise>
+                            Category
 
-                <a href="${pageContext.request.contextPath}/login">
-                    Đăng nhập
-                </a>
+                        </a>
 
-                &nbsp; | &nbsp;
+                    </li>
 
-                <a href="${pageContext.request.contextPath}/register">
-                    Đăng ký
-                </a>
+                    <li class="nav-item">
 
-            </c:otherwise>
+                        <a
+                            class="nav-link"
+                            href="${pageContext.request.contextPath}/admin/product/list">
 
-        </c:choose>
+                            Product CRUD
 
-    </nav>
+                        </a>
 
-</header>
+                    </li>
+
+                </c:if>
+
+            </ul>
+
+            <div class="d-flex align-items-center gap-2">
+
+                <c:choose>
+
+                    <c:when test="${not empty sessionScope.account}">
+
+                        <span class="navbar-text text-light me-2">
+
+                            Xin chào,
+
+                            <strong>
+                                ${sessionScope.account.fullName}
+                            </strong>
+
+                        </span>
+
+                        <a
+                            class="btn btn-outline-light btn-sm"
+                            href="${pageContext.request.contextPath}/profile">
+
+                            Profile
+
+                        </a>
+
+                        <a
+                            class="btn btn-danger btn-sm"
+                            href="${pageContext.request.contextPath}/logout">
+
+                            Đăng xuất
+
+                        </a>
+
+                    </c:when>
+
+                    <c:otherwise>
+
+                        <a
+                            class="btn btn-outline-light btn-sm"
+                            href="${pageContext.request.contextPath}/login">
+
+                            Đăng nhập
+
+                        </a>
+
+                        <a
+                            class="btn btn-primary btn-sm"
+                            href="${pageContext.request.contextPath}/register">
+
+                            Đăng ký
+
+                        </a>
+
+                    </c:otherwise>
+
+                </c:choose>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
