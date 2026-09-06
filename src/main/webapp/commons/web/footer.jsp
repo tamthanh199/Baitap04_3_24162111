@@ -9,7 +9,7 @@
 ">
 
     <p>
-        Bài tập User Profile - JPA - Multipart - SiteMesh
+        Doan Thanh Tam
     </p>
 
 </footer>

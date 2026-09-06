@@ -23,20 +23,24 @@ public class ProfileController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final UserService userService = new UserServiceImpl();
+    private final UserService userService =
+            new UserServiceImpl();
 
     @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
+        HttpSession session =
+                request.getSession(false);
 
         if (session == null
                 || session.getAttribute("account") == null) {
 
             response.sendRedirect(
-                    request.getContextPath() + "/session/login");
+                    request.getContextPath()
+                            + "/login");
 
             return;
         }
@@ -45,28 +49,35 @@ public class ProfileController extends HttpServlet {
                 (User) session.getAttribute("account");
 
         User user =
-                userService.getById(sessionUser.getId());
+                userService.getById(
+                        sessionUser.getId());
 
-        request.setAttribute("user", user);
+        request.setAttribute(
+                "user",
+                user);
 
-        request.getRequestDispatcher("/views/profile.jsp")
+        request.getRequestDispatcher(
+                "/views/profile.jsp")
                 .forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+    protected void doPost(
+            HttpServletRequest request,
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
 
-        HttpSession session = request.getSession(false);
+        HttpSession session =
+                request.getSession(false);
 
         if (session == null
                 || session.getAttribute("account") == null) {
 
             response.sendRedirect(
-                    request.getContextPath() + "/session/login");
+                    request.getContextPath()
+                            + "/login");
 
             return;
         }
@@ -75,7 +86,8 @@ public class ProfileController extends HttpServlet {
                 (User) session.getAttribute("account");
 
         User user =
-                userService.getById(sessionUser.getId());
+                userService.getById(
+                        sessionUser.getId());
 
         String fullName =
                 request.getParameter("fullName");
@@ -92,9 +104,12 @@ public class ProfileController extends HttpServlet {
                     request.getPart("image");
 
             String newImage =
-                    FileUploadUtil.saveProfileImage(imagePart);
+                    FileUploadUtil
+                            .saveProfileImage(
+                                    imagePart);
 
             user.setFullName(fullName);
+
             user.setPhone(phone);
 
             if (newImage != null) {
@@ -105,13 +120,17 @@ public class ProfileController extends HttpServlet {
                         && !oldImage.isBlank()) {
 
                     FileUploadUtil
-                            .deleteProfileImage(oldImage);
+                            .deleteProfileImage(
+                                    oldImage);
                 }
             }
 
             userService.update(user);
 
-            session.setAttribute("account", user);
+            // Cập nhật lại User trong Session
+            session.setAttribute(
+                    "account",
+                    user);
 
             response.sendRedirect(
                     request.getContextPath()
@@ -123,9 +142,12 @@ public class ProfileController extends HttpServlet {
                     "message",
                     exception.getMessage());
 
-            request.setAttribute("user", user);
+            request.setAttribute(
+                    "user",
+                    user);
 
-            request.getRequestDispatcher("/views/profile.jsp")
+            request.getRequestDispatcher(
+                    "/views/profile.jsp")
                     .forward(request, response);
         }
     }

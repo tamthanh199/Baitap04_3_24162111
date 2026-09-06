@@ -6,15 +6,26 @@ public interface UserService {
 
     boolean register(User user);
 
-    User login(String username, String password);
+    User login(
+            String username,
+            String password);
 
     User getById(int id);
 
+    User getByUsername(
+            String username);
+
+    User getByEmail(
+            String email);
+
     void update(User user);
 
-    boolean existsByUsername(String username);
+    boolean existsByUsername(
+            String username);
 
-    boolean existsByEmail(String email);
+    boolean existsByEmail(
+            String email);
 
-    boolean existsByPhone(String phone);
+    boolean existsByPhone(
+            String phone);
 }

@@ -7,15 +7,20 @@ import vn.hcmute.webpr330479.config.JPAConfig;
 import vn.hcmute.webpr330479.dao.UserDao;
 import vn.hcmute.webpr330479.models.User;
 
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl
+        implements UserDao {
 
     @Override
     public void insert(User user) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
+
+        EntityTransaction transaction =
+                entityManager.getTransaction();
 
         try {
+
             transaction.begin();
 
             entityManager.persist(user);
@@ -31,6 +36,7 @@ public class UserDaoImpl implements UserDao {
             throw exception;
 
         } finally {
+
             entityManager.close();
         }
     }
@@ -38,10 +44,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void update(User user) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
+
+        EntityTransaction transaction =
+                entityManager.getTransaction();
 
         try {
+
             transaction.begin();
 
             entityManager.merge(user);
@@ -57,6 +67,7 @@ public class UserDaoImpl implements UserDao {
             throw exception;
 
         } finally {
+
             entityManager.close();
         }
     }
@@ -64,28 +75,38 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User getById(int id) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
 
         try {
-            return entityManager.find(User.class, id);
+
+            return entityManager.find(
+                    User.class,
+                    id);
 
         } finally {
+
             entityManager.close();
         }
     }
 
     @Override
-    public User getByUsername(String username) {
+    public User getByUsername(
+            String username) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
 
         try {
 
             return entityManager
                     .createQuery(
-                            "SELECT u FROM User u WHERE u.username = :username",
+                            "SELECT u FROM User u "
+                            + "WHERE u.username = :username",
                             User.class)
-                    .setParameter("username", username)
+                    .setParameter(
+                            "username",
+                            username)
                     .getSingleResult();
 
         } catch (NoResultException exception) {
@@ -93,69 +114,123 @@ public class UserDaoImpl implements UserDao {
             return null;
 
         } finally {
+
             entityManager.close();
         }
     }
 
     @Override
-    public boolean existsByUsername(String username) {
+    public User getByEmail(
+            String email) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
 
         try {
 
-            Long count = entityManager
+            return entityManager
                     .createQuery(
-                            "SELECT COUNT(u) FROM User u WHERE u.username = :username",
-                            Long.class)
-                    .setParameter("username", username)
+                            "SELECT u FROM User u "
+                            + "WHERE u.email = :email",
+                            User.class)
+                    .setParameter(
+                            "email",
+                            email)
                     .getSingleResult();
 
-            return count > 0;
+        } catch (NoResultException exception) {
+
+            return null;
 
         } finally {
+
             entityManager.close();
         }
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public boolean existsByUsername(
+            String username) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
 
         try {
 
-            Long count = entityManager
-                    .createQuery(
-                            "SELECT COUNT(u) FROM User u WHERE u.email = :email",
-                            Long.class)
-                    .setParameter("email", email)
-                    .getSingleResult();
+            Long count =
+                    entityManager
+                            .createQuery(
+                                    "SELECT COUNT(u) "
+                                    + "FROM User u "
+                                    + "WHERE u.username = :username",
+                                    Long.class)
+                            .setParameter(
+                                    "username",
+                                    username)
+                            .getSingleResult();
 
             return count > 0;
 
         } finally {
+
             entityManager.close();
         }
     }
 
     @Override
-    public boolean existsByPhone(String phone) {
+    public boolean existsByEmail(
+            String email) {
 
-        EntityManager entityManager = JPAConfig.getEntityManager();
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
 
         try {
 
-            Long count = entityManager
-                    .createQuery(
-                            "SELECT COUNT(u) FROM User u WHERE u.phone = :phone",
-                            Long.class)
-                    .setParameter("phone", phone)
-                    .getSingleResult();
+            Long count =
+                    entityManager
+                            .createQuery(
+                                    "SELECT COUNT(u) "
+                                    + "FROM User u "
+                                    + "WHERE u.email = :email",
+                                    Long.class)
+                            .setParameter(
+                                    "email",
+                                    email)
+                            .getSingleResult();
 
             return count > 0;
 
         } finally {
+
+            entityManager.close();
+        }
+    }
+
+    @Override
+    public boolean existsByPhone(
+            String phone) {
+
+        EntityManager entityManager =
+                JPAConfig.getEntityManager();
+
+        try {
+
+            Long count =
+                    entityManager
+                            .createQuery(
+                                    "SELECT COUNT(u) "
+                                    + "FROM User u "
+                                    + "WHERE u.phone = :phone",
+                                    Long.class)
+                            .setParameter(
+                                    "phone",
+                                    phone)
+                            .getSingleResult();
+
+            return count > 0;
+
+        } finally {
+
             entityManager.close();
         }
     }

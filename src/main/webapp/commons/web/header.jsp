@@ -1,18 +1,29 @@
 <%@ page contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
+<%@ taglib prefix="c"
+    uri="jakarta.tags.core" %>
+
 <header style="
     background-color: #eeeeee;
     padding: 15px;
     margin-bottom: 20px;
 ">
 
-    <h2>WEBPR330479 - User Profile</h2>
+    <h2>
+        WEBPR330479 - Servlet CRUD MVC
+    </h2>
 
     <nav>
 
-        <a href="${pageContext.request.contextPath}/">
+        <a href="${pageContext.request.contextPath}/home">
             Trang chủ
+        </a>
+
+        &nbsp; | &nbsp;
+
+        <a href="${pageContext.request.contextPath}/product">
+            Sản phẩm
         </a>
 
         &nbsp; | &nbsp;
@@ -21,9 +32,15 @@
 
             <c:when test="${not empty sessionScope.account}">
 
-                <a href="${pageContext.request.contextPath}/session/home">
-                    Session Home
-                </a>
+                <span>
+
+                    Xin chào,
+
+                    <strong>
+                        ${sessionScope.account.fullName}
+                    </strong>
+
+                </span>
 
                 &nbsp; | &nbsp;
 
@@ -39,7 +56,13 @@
 
                 &nbsp; | &nbsp;
 
-                <a href="${pageContext.request.contextPath}/session/logout">
+                <a href="${pageContext.request.contextPath}/admin/product/list">
+                    Product CRUD
+                </a>
+
+                &nbsp; | &nbsp;
+
+                <a href="${pageContext.request.contextPath}/logout">
                     Đăng xuất
                 </a>
 
@@ -47,7 +70,7 @@
 
             <c:otherwise>
 
-                <a href="${pageContext.request.contextPath}/session/login">
+                <a href="${pageContext.request.contextPath}/login">
                     Đăng nhập
                 </a>
 

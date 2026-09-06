@@ -12,7 +12,7 @@
 
         <class>vn.hcmute.webpr330479.models.Category</class>
         <class>vn.hcmute.webpr330479.models.User</class>
-
+        <class>vn.hcmute.webpr330479.models.Product</class>
         <properties>
 
             <property

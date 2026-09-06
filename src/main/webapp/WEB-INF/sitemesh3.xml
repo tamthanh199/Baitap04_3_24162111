@@ -14,4 +14,8 @@
         path="/image*"
         exclude="true" />
 
+    <mapping
+        path="/product-image*"
+        exclude="true" />
+
 </sitemesh>

@@ -10,11 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import vn.hcmute.webpr330479.services.ProductService;
 import vn.hcmute.webpr330479.services.impl.ProductServiceImpl;
 
-@WebServlet({
-        "",
-        "/home"
-})
-public class HomeController
+@WebServlet("/admin/product/list")
+public class ProductListController
         extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -29,12 +26,11 @@ public class HomeController
             throws ServletException, IOException {
 
         request.setAttribute(
-                "latestProducts",
-                productService
-                        .getLatest(10));
+                "products",
+                productService.getAll());
 
         request.getRequestDispatcher(
-                "/views/index.jsp")
+                "/views/admin/list-product.jsp")
                 .forward(
                         request,
                         response);
