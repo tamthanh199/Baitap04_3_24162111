@@ -14,12 +14,14 @@ import vn.hcmute.webpr330479.models.User;
 import vn.hcmute.webpr330479.services.UserService;
 import vn.hcmute.webpr330479.services.impl.UserServiceImpl;
 import vn.hcmute.webpr330479.utils.FileUploadUtil;
+import vn.hcmute.webpr330479.utils.FormValidationUtil;
 
 @WebServlet(urlPatterns = {"/profile"})
 @MultipartConfig(
         maxFileSize = 5 * 1024 * 1024,
         maxRequestSize = 6 * 1024 * 1024)
-public class ProfileController extends HttpServlet {
+public class ProfileController
+        extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,7 +38,8 @@ public class ProfileController extends HttpServlet {
                 request.getSession(false);
 
         if (session == null
-                || session.getAttribute("account") == null) {
+                || session.getAttribute(
+                        "account") == null) {
 
             response.sendRedirect(
                     request.getContextPath()
@@ -46,7 +49,9 @@ public class ProfileController extends HttpServlet {
         }
 
         User sessionUser =
-                (User) session.getAttribute("account");
+                (User)
+                        session.getAttribute(
+                                "account");
 
         User user =
                 userService.getById(
@@ -58,7 +63,9 @@ public class ProfileController extends HttpServlet {
 
         request.getRequestDispatcher(
                 "/views/profile.jsp")
-                .forward(request, response);
+                .forward(
+                        request,
+                        response);
     }
 
     @Override
@@ -73,7 +80,8 @@ public class ProfileController extends HttpServlet {
                 request.getSession(false);
 
         if (session == null
-                || session.getAttribute("account") == null) {
+                || session.getAttribute(
+                        "account") == null) {
 
             response.sendRedirect(
                     request.getContextPath()
@@ -83,17 +91,66 @@ public class ProfileController extends HttpServlet {
         }
 
         User sessionUser =
-                (User) session.getAttribute("account");
+                (User)
+                        session.getAttribute(
+                                "account");
 
         User user =
                 userService.getById(
                         sessionUser.getId());
 
+        if (user == null) {
+
+            session.invalidate();
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/login");
+
+            return;
+        }
+
         String fullName =
-                request.getParameter("fullName");
+                trim(
+                        request.getParameter(
+                                "fullName"));
 
         String phone =
-                request.getParameter("phone");
+                trim(
+                        request.getParameter(
+                                "phone"));
+
+        String validationMessage =
+                FormValidationUtil
+                        .validateProfile(
+                                fullName,
+                                phone);
+
+        if (validationMessage != null) {
+
+            /*
+             * Chỉ thay dữ liệu trên object đang hiển thị.
+             * Chưa update database.
+             */
+            user.setFullName(fullName);
+            user.setPhone(phone);
+
+            request.setAttribute(
+                    "user",
+                    user);
+
+            request.setAttribute(
+                    "message",
+                    validationMessage);
+
+            request.getRequestDispatcher(
+                    "/views/profile.jsp")
+                    .forward(
+                            request,
+                            response);
+
+            return;
+        }
 
         String oldImage =
                 user.getImages();
@@ -101,20 +158,24 @@ public class ProfileController extends HttpServlet {
         try {
 
             Part imagePart =
-                    request.getPart("image");
+                    request.getPart(
+                            "image");
 
             String newImage =
                     FileUploadUtil
                             .saveProfileImage(
                                     imagePart);
 
-            user.setFullName(fullName);
+            user.setFullName(
+                    fullName);
 
-            user.setPhone(phone);
+            user.setPhone(
+                    phone);
 
             if (newImage != null) {
 
-                user.setImages(newImage);
+                user.setImages(
+                        newImage);
 
                 if (oldImage != null
                         && !oldImage.isBlank()) {
@@ -127,7 +188,6 @@ public class ProfileController extends HttpServlet {
 
             userService.update(user);
 
-            // Cập nhật lại User trong Session
             session.setAttribute(
                     "account",
                     user);
@@ -136,19 +196,46 @@ public class ProfileController extends HttpServlet {
                     request.getContextPath()
                             + "/profile?success=true");
 
-        } catch (IOException exception) {
-
-            request.setAttribute(
-                    "message",
-                    exception.getMessage());
+        } catch (IllegalStateException exception) {
 
             request.setAttribute(
                     "user",
                     user);
 
+            request.setAttribute(
+                    "message",
+                    "Ảnh tải lên quá lớn. "
+                            + "Kích thước tối đa là 5 MB.");
+
             request.getRequestDispatcher(
                     "/views/profile.jsp")
-                    .forward(request, response);
+                    .forward(
+                            request,
+                            response);
+
+        } catch (IOException exception) {
+
+            request.setAttribute(
+                    "user",
+                    user);
+
+            request.setAttribute(
+                    "message",
+                    exception.getMessage());
+
+            request.getRequestDispatcher(
+                    "/views/profile.jsp")
+                    .forward(
+                            request,
+                            response);
         }
+    }
+
+    private String trim(
+            String value) {
+
+        return value == null
+                ? ""
+                : value.trim();
     }
 }

@@ -14,6 +14,7 @@ import vn.hcmute.webpr330479.models.User;
 import vn.hcmute.webpr330479.services.UserService;
 import vn.hcmute.webpr330479.services.impl.UserServiceImpl;
 import vn.hcmute.webpr330479.utils.EmailUtil;
+import vn.hcmute.webpr330479.utils.FormValidationUtil;
 import vn.hcmute.webpr330479.utils.OtpUtil;
 
 @WebServlet("/verify-otp")
@@ -66,8 +67,7 @@ public class VerifyOtpController
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding(
-                "UTF-8");
+        request.setCharacterEncoding("UTF-8");
 
         HttpSession session =
                 request.getSession(false);
@@ -85,8 +85,7 @@ public class VerifyOtpController
         }
 
         String action =
-                request.getParameter(
-                        "action");
+                request.getParameter("action");
 
         if ("resend".equals(action)) {
 
@@ -100,8 +99,7 @@ public class VerifyOtpController
         }
 
         String inputOtp =
-                request.getParameter(
-                        "otp");
+                request.getParameter("otp");
 
         String savedOtp =
                 (String)
@@ -117,21 +115,21 @@ public class VerifyOtpController
                 "email",
                 pendingUser.getEmail());
 
-        if (inputOtp == null
-                || inputOtp.trim().isEmpty()) {
+        String validationMessage =
+                FormValidationUtil
+                        .validateOtp(inputOtp);
 
-            request.setAttribute(
-                    "message",
-                    "Vui lòng nhập mã OTP.");
+        if (validationMessage != null) {
 
-            request.getRequestDispatcher(
-                    "/views/verify-otp.jsp")
-                    .forward(
-                            request,
-                            response);
+            forwardWithMessage(
+                    request,
+                    response,
+                    validationMessage);
 
             return;
         }
+
+        inputOtp = inputOtp.trim();
 
         if (savedOtp == null
                 || expiry == null
@@ -139,32 +137,21 @@ public class VerifyOtpController
                         .now()
                         .isAfter(expiry)) {
 
-            request.setAttribute(
-                    "message",
+            forwardWithMessage(
+                    request,
+                    response,
                     "Mã OTP đã hết hạn. "
-                    + "Vui lòng gửi lại OTP.");
-
-            request.getRequestDispatcher(
-                    "/views/verify-otp.jsp")
-                    .forward(
-                            request,
-                            response);
+                            + "Vui lòng gửi lại OTP.");
 
             return;
         }
 
-        if (!savedOtp.equals(
-                inputOtp.trim())) {
+        if (!savedOtp.equals(inputOtp)) {
 
-            request.setAttribute(
-                    "message",
+            forwardWithMessage(
+                    request,
+                    response,
                     "Mã OTP không đúng.");
-
-            request.getRequestDispatcher(
-                    "/views/verify-otp.jsp")
-                    .forward(
-                            request,
-                            response);
 
             return;
         }
@@ -178,7 +165,7 @@ public class VerifyOtpController
             request.setAttribute(
                     "message",
                     "Thông tin tài khoản đã tồn tại. "
-                    + "Vui lòng đăng ký lại.");
+                            + "Vui lòng đăng ký lại.");
 
             request.getRequestDispatcher(
                     "/views/register.jsp")
@@ -240,6 +227,23 @@ public class VerifyOtpController
         request.setAttribute(
                 "email",
                 pendingUser.getEmail());
+
+        request.getRequestDispatcher(
+                "/views/verify-otp.jsp")
+                .forward(
+                        request,
+                        response);
+    }
+
+    private void forwardWithMessage(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String message)
+            throws ServletException, IOException {
+
+        request.setAttribute(
+                "message",
+                message);
 
         request.getRequestDispatcher(
                 "/views/verify-otp.jsp")

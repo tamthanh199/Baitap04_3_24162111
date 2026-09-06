@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.hcmute.webpr330479.models.User;
 import vn.hcmute.webpr330479.services.UserService;
 import vn.hcmute.webpr330479.services.impl.UserServiceImpl;
+import vn.hcmute.webpr330479.utils.FormValidationUtil;
 
 @WebServlet("/reset-password")
 public class ResetPasswordController
@@ -54,8 +55,7 @@ public class ResetPasswordController
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding(
-                "UTF-8");
+        request.setCharacterEncoding("UTF-8");
 
         HttpSession session =
                 request.getSession(false);
@@ -72,35 +72,23 @@ public class ResetPasswordController
         }
 
         String password =
-                request.getParameter(
-                        "password");
+                request.getParameter("password");
 
         String confirmPassword =
                 request.getParameter(
                         "confirmPassword");
 
-        if (password == null
-                || password.isEmpty()) {
+        String validationMessage =
+                FormValidationUtil
+                        .validateResetPassword(
+                                password,
+                                confirmPassword);
+
+        if (validationMessage != null) {
 
             request.setAttribute(
                     "message",
-                    "Vui lòng nhập mật khẩu mới.");
-
-            request.getRequestDispatcher(
-                    "/views/reset-password.jsp")
-                    .forward(
-                            request,
-                            response);
-
-            return;
-        }
-
-        if (!password.equals(
-                confirmPassword)) {
-
-            request.setAttribute(
-                    "message",
-                    "Xác nhận mật khẩu không khớp.");
+                    validationMessage);
 
             request.getRequestDispatcher(
                     "/views/reset-password.jsp")
@@ -117,13 +105,11 @@ public class ResetPasswordController
                                 "resetVerifiedUserId");
 
         User user =
-                userService.getById(
-                        userId);
+                userService.getById(userId);
 
         if (user == null) {
 
-            clearResetSession(
-                    session);
+            clearResetSession(session);
 
             response.sendRedirect(
                     request.getContextPath()
@@ -132,14 +118,11 @@ public class ResetPasswordController
             return;
         }
 
-        user.setPassword(
-                password);
+        user.setPassword(password);
 
-        userService.update(
-                user);
+        userService.update(user);
 
-        clearResetSession(
-                session);
+        clearResetSession(session);
 
         response.sendRedirect(
                 request.getContextPath()

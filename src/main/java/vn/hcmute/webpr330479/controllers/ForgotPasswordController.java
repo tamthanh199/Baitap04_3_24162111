@@ -14,6 +14,7 @@ import vn.hcmute.webpr330479.models.User;
 import vn.hcmute.webpr330479.services.UserService;
 import vn.hcmute.webpr330479.services.impl.UserServiceImpl;
 import vn.hcmute.webpr330479.utils.EmailUtil;
+import vn.hcmute.webpr330479.utils.FormValidationUtil;
 import vn.hcmute.webpr330479.utils.OtpUtil;
 
 @WebServlet("/forgot-password")
@@ -47,12 +48,10 @@ public class ForgotPasswordController
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding(
-                "UTF-8");
+        request.setCharacterEncoding("UTF-8");
 
         String email =
-                request.getParameter(
-                        "email");
+                request.getParameter("email");
 
         email =
                 email == null
@@ -63,38 +62,30 @@ public class ForgotPasswordController
                 "email",
                 email);
 
-        if (email.isEmpty()) {
+        String validationMessage =
+                FormValidationUtil
+                        .validateEmail(email);
 
-            request.setAttribute(
-                    "message",
-                    "Vui lòng nhập email.");
+        if (validationMessage != null) {
 
-            request.getRequestDispatcher(
-                    "/views/forgot-password.jsp")
-                    .forward(
-                            request,
-                            response);
+            forwardWithMessage(
+                    request,
+                    response,
+                    validationMessage);
 
             return;
         }
 
         User user =
                 userService
-                        .getByEmail(
-                                email);
+                        .getByEmail(email);
 
         if (user == null) {
 
-            request.setAttribute(
-                    "message",
-                    "Không tìm thấy tài khoản "
-                    + "với email này.");
-
-            request.getRequestDispatcher(
-                    "/views/forgot-password.jsp")
-                    .forward(
-                            request,
-                            response);
+            forwardWithMessage(
+                    request,
+                    response,
+                    "Không tìm thấy tài khoản với email này.");
 
             return;
         }
@@ -111,16 +102,11 @@ public class ForgotPasswordController
 
         } catch (MessagingException exception) {
 
-            request.setAttribute(
-                    "message",
+            forwardWithMessage(
+                    request,
+                    response,
                     "Không gửi được OTP: "
                             + exception.getMessage());
-
-            request.getRequestDispatcher(
-                    "/views/forgot-password.jsp")
-                    .forward(
-                            request,
-                            response);
 
             return;
         }
@@ -153,5 +139,22 @@ public class ForgotPasswordController
         response.sendRedirect(
                 request.getContextPath()
                         + "/verify-reset-otp");
+    }
+
+    private void forwardWithMessage(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String message)
+            throws ServletException, IOException {
+
+        request.setAttribute(
+                "message",
+                message);
+
+        request.getRequestDispatcher(
+                "/views/forgot-password.jsp")
+                .forward(
+                        request,
+                        response);
     }
 }

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.hcmute.webpr330479.utils.EmailUtil;
+import vn.hcmute.webpr330479.utils.FormValidationUtil;
 import vn.hcmute.webpr330479.utils.OtpUtil;
 
 @WebServlet("/verify-reset-otp")
@@ -58,8 +59,7 @@ public class VerifyResetOtpController
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding(
-                "UTF-8");
+        request.setCharacterEncoding("UTF-8");
 
         HttpSession session =
                 request.getSession(false);
@@ -74,8 +74,7 @@ public class VerifyResetOtpController
         }
 
         String action =
-                request.getParameter(
-                        "action");
+                request.getParameter("action");
 
         if ("resend".equals(action)) {
 
@@ -88,8 +87,7 @@ public class VerifyResetOtpController
         }
 
         String inputOtp =
-                request.getParameter(
-                        "otp");
+                request.getParameter("otp");
 
         String savedOtp =
                 (String)
@@ -106,21 +104,21 @@ public class VerifyResetOtpController
                 session.getAttribute(
                         "resetEmail"));
 
-        if (inputOtp == null
-                || inputOtp.trim().isEmpty()) {
+        String validationMessage =
+                FormValidationUtil
+                        .validateOtp(inputOtp);
 
-            request.setAttribute(
-                    "message",
-                    "Vui lòng nhập mã OTP.");
+        if (validationMessage != null) {
 
-            request.getRequestDispatcher(
-                    "/views/verify-reset-otp.jsp")
-                    .forward(
-                            request,
-                            response);
+            forwardWithMessage(
+                    request,
+                    response,
+                    validationMessage);
 
             return;
         }
+
+        inputOtp = inputOtp.trim();
 
         if (savedOtp == null
                 || expiry == null
@@ -128,32 +126,21 @@ public class VerifyResetOtpController
                         .now()
                         .isAfter(expiry)) {
 
-            request.setAttribute(
-                    "message",
+            forwardWithMessage(
+                    request,
+                    response,
                     "Mã OTP đã hết hạn. "
-                    + "Vui lòng gửi lại.");
-
-            request.getRequestDispatcher(
-                    "/views/verify-reset-otp.jsp")
-                    .forward(
-                            request,
-                            response);
+                            + "Vui lòng gửi lại.");
 
             return;
         }
 
-        if (!savedOtp.equals(
-                inputOtp.trim())) {
+        if (!savedOtp.equals(inputOtp)) {
 
-            request.setAttribute(
-                    "message",
+            forwardWithMessage(
+                    request,
+                    response,
                     "Mã OTP không đúng.");
-
-            request.getRequestDispatcher(
-                    "/views/verify-reset-otp.jsp")
-                    .forward(
-                            request,
-                            response);
 
             return;
         }
@@ -221,6 +208,23 @@ public class VerifyResetOtpController
         request.setAttribute(
                 "email",
                 email);
+
+        request.getRequestDispatcher(
+                "/views/verify-reset-otp.jsp")
+                .forward(
+                        request,
+                        response);
+    }
+
+    private void forwardWithMessage(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String message)
+            throws ServletException, IOException {
+
+        request.setAttribute(
+                "message",
+                message);
 
         request.getRequestDispatcher(
                 "/views/verify-reset-otp.jsp")

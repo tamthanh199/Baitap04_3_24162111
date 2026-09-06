@@ -14,6 +14,7 @@ import vn.hcmute.webpr330479.models.User;
 import vn.hcmute.webpr330479.services.UserService;
 import vn.hcmute.webpr330479.services.impl.UserServiceImpl;
 import vn.hcmute.webpr330479.utils.EmailUtil;
+import vn.hcmute.webpr330479.utils.FormValidationUtil;
 import vn.hcmute.webpr330479.utils.OtpUtil;
 
 @WebServlet("/register")
@@ -47,39 +48,26 @@ public class RegisterController
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding(
-                "UTF-8");
-
-        response.setCharacterEncoding(
-                "UTF-8");
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
 
         String fullName =
-                trim(
-                        request.getParameter(
-                                "fullName"));
+                trim(request.getParameter("fullName"));
 
         String email =
-                trim(
-                        request.getParameter(
-                                "email"));
+                trim(request.getParameter("email"));
 
         String phone =
-                trim(
-                        request.getParameter(
-                                "phone"));
+                trim(request.getParameter("phone"));
 
         String username =
-                trim(
-                        request.getParameter(
-                                "username"));
+                trim(request.getParameter("username"));
 
         String password =
-                request.getParameter(
-                        "password");
+                request.getParameter("password");
 
         String confirmPassword =
-                request.getParameter(
-                        "confirmPassword");
+                request.getParameter("confirmPassword");
 
         request.setAttribute(
                 "fullName",
@@ -97,35 +85,28 @@ public class RegisterController
                 "username",
                 username);
 
-        if (fullName.isEmpty()
-                || email.isEmpty()
-                || phone.isEmpty()
-                || username.isEmpty()
-                || password == null
-                || password.isEmpty()) {
+        String validationMessage =
+                FormValidationUtil
+                        .validateRegister(
+                                fullName,
+                                email,
+                                phone,
+                                username,
+                                password,
+                                confirmPassword);
+
+        if (validationMessage != null) {
 
             forwardWithMessage(
                     request,
                     response,
-                    "Vui lòng nhập đầy đủ thông tin.");
-
-            return;
-        }
-
-        if (!password.equals(
-                confirmPassword)) {
-
-            forwardWithMessage(
-                    request,
-                    response,
-                    "Xác nhận mật khẩu không khớp.");
+                    validationMessage);
 
             return;
         }
 
         if (userService
-                .existsByUsername(
-                        username)) {
+                .existsByUsername(username)) {
 
             forwardWithMessage(
                     request,
@@ -136,8 +117,7 @@ public class RegisterController
         }
 
         if (userService
-                .existsByEmail(
-                        email)) {
+                .existsByEmail(email)) {
 
             forwardWithMessage(
                     request,
@@ -148,8 +128,7 @@ public class RegisterController
         }
 
         if (userService
-                .existsByPhone(
-                        phone)) {
+                .existsByPhone(phone)) {
 
             forwardWithMessage(
                     request,
